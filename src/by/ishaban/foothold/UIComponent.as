@@ -301,6 +301,10 @@ package by.ishaban.foothold {
 			addViewListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage);
 
 			super.initialize();
+
+			if (_view.stage) {
+				onAddedToStage();
+			}
 		}
 
 
@@ -404,7 +408,7 @@ package by.ishaban.foothold {
 		}
 
 
-		private function onAddedToStage(event: Event): void {
+		private function onAddedToStage(event: Event = null): void {
 			_depth = getDisplayObjectDepthFromStage(view);
 
 			if (!_isInitialized) {
