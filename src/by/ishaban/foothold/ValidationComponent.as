@@ -6,18 +6,10 @@ package by.ishaban.foothold {
 
 	public class ValidationComponent extends EventDispatcher implements IValidating {
 
-		// для базовых флагов защиваем значения подальше, дабы кастомные флаги можно было начинать с 1
-		/**
-		 * This flag should be used only internally.
-		 */
-		public static const INVALIDATE_NONE: uint = 0;
-		public static const INVALIDATE_ALL: uint = 1024;
-		public static const INVALIDATE_DATA: uint = 2048;
-		public static const INVALIDATE_SIZE: uint = 4096;
-		public static const INVALIDATE_STATE: uint = 16384;
-		// example
-		// public static const INVALIDATE_...: uint = 8192;
-
+		CONFIG::debug{
+			[ArrayElementType("uint")]
+			private var _availableFlagsToInvalidate: Array = [];
+		}
 		/**
 		 * @private
 		 * Flag to indicate that the control is currently validating.
@@ -29,43 +21,39 @@ package by.ishaban.foothold {
 		 * @private
 		 */
 		protected var _isDisposed: Boolean = false;
-		private var _invalidationMask: uint = INVALIDATE_NONE;
-		private var _delayedInvalidationMask: uint = INVALIDATE_NONE;
-		private var _target: Sprite;
+		protected var _view: Sprite;
+		private var _invalidationMask: uint = InvalidationType.INVALIDATE_NONE;
+		private var _delayedInvalidationMask: uint = InvalidationType.INVALIDATE_NONE;
 
-		CONFIG::debug{
-			[ArrayElementType("uint")]
-			private var _availableFlagsToInvalidate: Array = [];
-		}
 
-		public function ValidationComponent(target: Sprite) {
+		public function ValidationComponent(view: Sprite) {
 			CONFIG::debug{
 				if (Object(this).constructor == ValidationComponent) {
 					throw new IllegalOperationError("ValidationComponent is abstract class, please extend it.");
 				}
 			}
-			_target = target;
+			_view = view;
 			_validationManager = ValidationManager.getInstance();
 			initialize();
 
 			CONFIG::debug{
-				checkFlags(INVALIDATE_ALL, INVALIDATE_DATA, INVALIDATE_SIZE, INVALIDATE_STATE);
+				checkFlags(InvalidationType.INVALIDATE_ALL, InvalidationType.INVALIDATE_DATA, InvalidationType.INVALIDATE_SIZE, InvalidationType.INVALIDATE_STATE);
 			}
 		}
 
 
-		public function get target(): Sprite {
-			return _target;
+		public function get view(): Sprite {
+			return _view;
 		}
 
 
 		public function get depth(): int {
-			return 0;
+			return -1;
 		}
 
 
 		public function dispose(): void {
-			_target = null;
+			_view = null;
 			_validationManager = null;
 			_isDisposed = true;
 		}
@@ -87,15 +75,15 @@ package by.ishaban.foothold {
 			var invalidate: Boolean;
 			if (flags.length == 0) {
 				if (_isValidating) {
-					_delayedInvalidationMask |= INVALIDATE_ALL;
+					_delayedInvalidationMask |= InvalidationType.INVALIDATE_ALL;
 				} else {
-					_invalidationMask |= INVALIDATE_ALL;
+					_invalidationMask |= InvalidationType.INVALIDATE_ALL;
 				}
 				invalidate = true;
 			} else {
 				for each (var flag: uint in flags) {
 					CONFIG::debug{
-						if (flag == INVALIDATE_NONE) {
+						if (flag == InvalidationType.INVALIDATE_NONE) {
 							throw new IllegalOperationError("Setup flag ValidationComponent.INVALIDATE_NONE prohibited!");
 						}
 					}
@@ -154,12 +142,27 @@ package by.ishaban.foothold {
 			_isValidating = true;
 			draw();
 			_invalidationMask = _delayedInvalidationMask;
-			_delayedInvalidationMask = INVALIDATE_NONE;
+			_delayedInvalidationMask = InvalidationType.INVALIDATE_NONE;
 			_isValidating = false;
 //			if (!_hasValidated) {
 //				_hasValidated = true;
 //				dispatchEvent(new Event(FeathersEventType.CREATION_COMPLETE));
 //			}
+		}
+
+
+		public function invalidateSize(): void {
+			invalidate(InvalidationType.INVALIDATE_SIZE);
+		}
+
+
+		public function invalidateData(): void {
+			invalidate(InvalidationType.INVALIDATE_DATA);
+		}
+
+
+		public function invalidateState(): void {
+			invalidate(InvalidationType.INVALIDATE_STATE);
 		}
 
 
@@ -196,8 +199,8 @@ package by.ishaban.foothold {
 		 * returns <code>true</code>.
 		 */
 		protected function isInvalid(...flags): Boolean {
-			if (Boolean(_invalidationMask & INVALIDATE_ALL) ||
-			    (_invalidationMask != INVALIDATE_NONE && flags.length == 0)) {
+			if (Boolean(_invalidationMask & InvalidationType.INVALIDATE_ALL) ||
+			    (_invalidationMask != InvalidationType.INVALIDATE_NONE && flags.length == 0)) {
 				return true;
 			}
 			for each (var flag: uint in flags) {
