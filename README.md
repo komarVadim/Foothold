@@ -1,4 +1,4 @@
-# foothold
+# Foothold
 Alternative to Scaleform's CLIK framework.
 
 It is attempt to build alternative to Scaleform's CLIK framework. Inspired by Starling and Feathers frameworks.
