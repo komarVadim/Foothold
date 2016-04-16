@@ -14,3 +14,9 @@ It is attempt to build alternative to Scaleform's CLIK framework. Inspired by St
 Если же вы желаете запилить какую то крутую идею, то прошу запилить все в отдельной веточке (не master \ develop) и в конце прислать пулриквест.
 
 Спасибо.
+
+P.S. 
+
+Настройки проекта я пока не коммитал, но документ класс это: **test.Root**
+
+Так же в настройки компиляции (additional compiler options) надо добавить следующие параметры: **-define=CONFIG::debug,true -define=CONFIG::release,false**
