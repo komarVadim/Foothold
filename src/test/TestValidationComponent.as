@@ -1,23 +1,30 @@
 package test {
 
-	import by.ishaban.foothold.ValidationComponent;
+	import by.ishaban.foothold.UIComponent;
 
-	import flash.display.MovieClip;
+	import flash.display.Sprite;
 
 	/**
 	 * Temporary class aimed to test framework features.
 	 */
-	public class TestValidationComponent extends ValidationComponent {
+	public class TestValidationComponent extends UIComponent {
 		public static const INVALIDATE_MY_PROP: uint = 1;
 
 
-		public function TestValidationComponent(target: MovieClip) {
+		public function TestValidationComponent(target: Sprite) {
 			super(target);
 		}
 
 
 		override protected function draw(): void {
 			super.draw();
+			trace(">> draw", this);
+		}
+
+
+		override protected function configUI(): void {
+			super.configUI();
+			trace(">> config ui", this);
 		}
 
 
