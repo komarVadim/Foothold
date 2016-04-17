@@ -1,5 +1,5 @@
 <?xml version="1.0"?>
-<project name="starling" basedir="../.." default="build">
+<project name="foothold" basedir="../.." default="build">
     <description>Foothold SWC Assembler</description>
 
     <!-- Properties -->
