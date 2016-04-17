@@ -1,4 +1,4 @@
-package by.ishaban.foothold {
+package by.ishaban.foothold.core {
 
 	/**
 	 * Для базовых флагов защиваем значения подальше, дабы кастомные флаги можно было начинать с 1

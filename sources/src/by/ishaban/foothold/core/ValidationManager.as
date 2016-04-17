@@ -1,10 +1,10 @@
-package by.ishaban.foothold {
+package by.ishaban.foothold.core {
+
+	import by.ishaban.foothold.Foothold;
 
 	import flash.display.Stage;
 	import flash.errors.IllegalOperationError;
 	import flash.events.Event;
-
-	import test.Root;
 
 	public class ValidationManager {
 
@@ -45,7 +45,7 @@ package by.ishaban.foothold {
 			if (lock == null) {
 				throw IllegalOperationError("It is singleton class, do not try to initialize it out of existing API");
 			}
-			_stage = Root.stage;
+			_stage = Foothold.stage;
 		}
 
 

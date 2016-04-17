@@ -1,27 +1,24 @@
 package test {
 
+	import by.ishaban.foothold.Foothold;
+
 	import flash.display.MovieClip;
 	import flash.display.Sprite;
-	import flash.display.Stage;
 	import flash.events.Event;
 
 	/**
 	 * Temporary class aimed to test framework features.
 	 */
 	public class Root extends MovieClip {
-		/**
-		 * TODO: move to framework root component.
-		 */
-		public static var stage: Stage;
 
 
 		private var _testComponent: TestValidationComponent;
 
 
 		public function Root() {
-			Root.stage = this.stage;
+			Foothold.initialize(stage);
 
-			if (stage) {
+			if (Foothold.stage) {
 				addEventListener(Event.ENTER_FRAME, onEnterFrame);
 			} else {
 				addEventListener(Event.ADDED_TO_STAGE, onAddedToStage);

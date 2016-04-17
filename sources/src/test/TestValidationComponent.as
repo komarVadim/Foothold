@@ -1,6 +1,6 @@
 package test {
 
-	import by.ishaban.foothold.UIComponent;
+	import by.ishaban.foothold.core.UIComponent;
 
 	import flash.display.Sprite;
 

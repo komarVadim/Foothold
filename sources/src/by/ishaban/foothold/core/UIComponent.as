@@ -1,12 +1,12 @@
-package by.ishaban.foothold {
+package by.ishaban.foothold.core {
+
+	import by.ishaban.foothold.*;
 
 	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
-
-	import test.Root;
 
 	public class UIComponent extends ValidationComponent {
 		/**
@@ -371,12 +371,12 @@ package by.ishaban.foothold {
 
 
 		protected function addStageListener(type: String, listener: Function, useCapture: Boolean = false, priority: int = 0): void {
-			Root.stage.addEventListener(type, listener, useCapture, priority, true);
+			Foothold.stage.addEventListener(type, listener, useCapture, priority, true);
 		}
 
 
 		protected function removeStageListener(type: String, listener: Function, useCapture: Boolean = false): void {
-			Root.stage.removeEventListener(type, listener, useCapture);
+			Foothold.stage.removeEventListener(type, listener, useCapture);
 		}
 
 

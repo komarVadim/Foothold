@@ -1,4 +1,4 @@
-package by.ishaban.foothold {
+package by.ishaban.foothold.core {
 
 	import flash.display.Sprite;
 	import flash.errors.IllegalOperationError;

@@ -1,4 +1,4 @@
-package by.ishaban.foothold {
+package by.ishaban.foothold.core {
 
 	public interface IValidating {
 		/**
