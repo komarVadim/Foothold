@@ -1,8 +1,10 @@
 package by.ishaban.foothold.core {
 
 	/**
-	 * Для базовых флагов защиваем значения подальше, дабы кастомные флаги можно было начинать с 1
-	 * @example public static const INVALIDATE_...: uint = 8192;
+	 * Values: 0, 1, 2048, 4096, 8192 are reserved, please use any other values for custom flags.
+	 *
+	 * @example
+	 *  <code>public static const INVALIDATE_...: uint = 16384;</code>
 	 */
 	public class InvalidationType {
 		/**
@@ -11,7 +13,7 @@ package by.ishaban.foothold.core {
 		public static const INVALIDATE_NONE: uint = 0;
 
 
-		public static const INVALIDATE_ALL: uint = 1024;
+		public static const INVALIDATE_ALL: uint = 1;
 
 
 		public static const INVALIDATE_DATA: uint = 2048;
@@ -20,7 +22,7 @@ package by.ishaban.foothold.core {
 		public static const INVALIDATE_SIZE: uint = 4096;
 
 
-		public static const INVALIDATE_STATE: uint = 16384;
+		public static const INVALIDATE_STATE: uint = 8192;
 
 
 		public function InvalidationType() {

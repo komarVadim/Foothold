@@ -7,8 +7,7 @@ package by.ishaban.foothold.core {
 	public class ValidationComponent extends EventDispatcher implements IValidating {
 
 		CONFIG::debug{
-			[ArrayElementType("uint")]
-			private var _availableFlagsToInvalidate: Array = [];
+			private var _availableFlagsHash: uint;
 		}
 		/**
 		 * @private
@@ -48,6 +47,7 @@ package by.ishaban.foothold.core {
 
 
 		public function get depth(): int {
+			// TODO: I don't decide to keep depth calculation logic here or in UIComponent.
 			return -1;
 		}
 
@@ -61,32 +61,28 @@ package by.ishaban.foothold.core {
 
 		/**
 		 *
-		 * @param flags Array:uint, If no arguments passed, that means that we should invalidate all flags.
+		 * @param flags
+		 *
+		 * TODO: i don't like it, but i didn't fount any easy way to declare compilation order,
+		 * TODO: so i inline InvalidationType.INVALIDATE_ALL constant (( Need to find workaround
 		 */
-		public function invalidate(...flags): void {
+		public function invalidate(flags: uint = 1/*InvalidationType.INVALIDATE_ALL*/): void {
 			CONFIG::debug{
-				for each (var flag: uint in flags) {
-					if (_availableFlagsToInvalidate.indexOf(flag) == -1) {
-						throw new IllegalOperationError("You cannot validate flag (" + flag + ") that not available for " + this + " component.");
-					}
+				if ((flags & ~_availableFlagsHash) != 0) {
+					throw new IllegalOperationError("You cannot validate flag that not available for " + this + " component. Please check flags in 'invalidate()' method above the stack.");
 				}
 			}
 			var isAlreadyInvalid: Boolean = isInvalid();
 			var invalidate: Boolean;
-			if (flags.length == 0) {
+			if (flags & InvalidationType.INVALIDATE_ALL) {
 				if (_isValidating) {
-					_delayedInvalidationMask |= InvalidationType.INVALIDATE_ALL;
+					_delayedInvalidationMask = InvalidationType.INVALIDATE_ALL;
 				} else {
-					_invalidationMask |= InvalidationType.INVALIDATE_ALL;
+					_invalidationMask = InvalidationType.INVALIDATE_ALL;
 				}
 				invalidate = true;
 			} else {
 				for each (var flag: uint in flags) {
-					CONFIG::debug{
-						if (flag == InvalidationType.INVALIDATE_NONE) {
-							throw new IllegalOperationError("Setup flag ValidationComponent.INVALIDATE_NONE prohibited!");
-						}
-					}
 					// примедение используется только для улучшения читаемости
 					if (!Boolean(_invalidationMask & flag)) {
 						// надо продумать что бы было меньше однотипных проверок, возможно стоит описать 2 цикла
@@ -166,16 +162,19 @@ package by.ishaban.foothold.core {
 		}
 
 
+		/**
+		 * Debug function to ensure that all flags values are unique.
+		 *
+		 * @param flags
+		 */
 		CONFIG::debug
 		protected function checkFlags(...flags): void {
-			_availableFlagsToInvalidate = flags;
-
-			var temp: Array = _availableFlagsToInvalidate.concat();
-			while (temp.length != 0) {
-				var flag: * = temp.shift();
-				if (temp.indexOf(flag) != -1) {
-					throw new SecurityError("Validation flags overlap detected, please check flags with value: " + flag + ".");
+			while (flags.length != 0) {
+				var flag: * = flags.shift();
+				if (_availableFlagsHash & flag) {
+					throw new IllegalOperationError("Validation flags overlap detected, please check flags with value: " + flag + ".");
 				}
+				_availableFlagsHash |= flag;
 			}
 		}
 
@@ -197,19 +196,13 @@ package by.ishaban.foothold.core {
 		 * if that flag has been set (others may be set too, but it checks the
 		 * specific flag only. If all flags have been marked as invalid, always
 		 * returns <code>true</code>.
+		 *
+		 * TODO: i don't like it, but i didn't fount any easy way to declare compilation order,
+		 * TODO: so i inline InvalidationType.INVALIDATE_ALL constant (( Need to find workaround
 		 */
-		protected function isInvalid(...flags): Boolean {
-			if (Boolean(_invalidationMask & InvalidationType.INVALIDATE_ALL) ||
-			    (_invalidationMask != InvalidationType.INVALIDATE_NONE && flags.length == 0)) {
-				return true;
-			}
-			for each (var flag: uint in flags) {
-				// примедение используется только для улучшения читаемости
-				if (Boolean(_invalidationMask & flag)) {
-					return true;
-				}
-			}
-			return false;
+		protected function isInvalid(flags: uint = 1/*InvalidationType.INVALIDATE_ALL*/): Boolean {
+			return _invalidationMask & flags ||
+			       (flags & InvalidationType.INVALIDATE_ALL && _invalidationMask != InvalidationType.INVALIDATE_NONE);
 		}
 	}
 }
