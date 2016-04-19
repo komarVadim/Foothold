@@ -1,7 +1,9 @@
 package by.ishaban.foothold.core {
 
+	import flash.display.DisplayObject;
 	import flash.display.Sprite;
 	import flash.errors.IllegalOperationError;
+	import flash.events.Event;
 	import flash.events.EventDispatcher;
 
 	public class ValidationComponent extends EventDispatcher implements IValidating {
@@ -9,6 +11,29 @@ package by.ishaban.foothold.core {
 		CONFIG::debug{
 			private var _availableFlagsHash: uint;
 		}
+
+
+		/**
+		 * Calculates how many levels deep the target object is on the display list,
+		 * starting from the Starling stage. If the target object is the stage, the
+		 * depth will be <code>0</code>. A direct child of the stage will have a
+		 * depth of <code>1</code>, and it increases with each new level. If the
+		 * object does not have a reference to the stage, the depth will always be
+		 * <code>-1</code>, even if the object has a parent.
+		 */
+		protected static function getDisplayObjectDepthFromStage(target: DisplayObject): int {
+			if (!target.stage) {
+				return -1;
+			}
+			var count: int = 0;
+			while (target.parent) {
+				target = target.parent;
+				count++;
+			}
+			return count;
+		}
+
+
 		/**
 		 * @private
 		 * Flag to indicate that the control is currently validating.
@@ -23,6 +48,7 @@ package by.ishaban.foothold.core {
 		protected var _view: Sprite;
 		private var _invalidationMask: uint = InvalidationType.INVALIDATE_NONE;
 		private var _delayedInvalidationMask: uint = InvalidationType.INVALIDATE_NONE;
+		private var _depth: int = -1;
 
 
 		public function ValidationComponent(view: Sprite) {
@@ -47,8 +73,7 @@ package by.ishaban.foothold.core {
 
 
 		public function get depth(): int {
-			// TODO: I don't decide to keep depth calculation logic here or in UIComponent.
-			return -1;
+			return _depth;
 		}
 
 
@@ -82,17 +107,14 @@ package by.ishaban.foothold.core {
 				}
 				invalidate = true;
 			} else {
-				for each (var flag: uint in flags) {
-					// примедение используется только для улучшения читаемости
-					if (!Boolean(_invalidationMask & flag)) {
-						// надо продумать что бы было меньше однотипных проверок, возможно стоит описать 2 цикла
-						if (_isValidating) {
-							_delayedInvalidationMask |= flag;
-						} else {
-							_invalidationMask |= flag;
-						}
-						invalidate = true;
+				var diff: uint = flags & ~_invalidationMask;
+				if (diff != 0) {
+					if (_isValidating) {
+						_delayedInvalidationMask |= diff;
+					} else {
+						_invalidationMask |= diff;
 					}
+					invalidate = true;
 				}
 			}
 			// спорно, надо продумать, _validationManager нул только если мы уже задиспозились
@@ -162,6 +184,16 @@ package by.ishaban.foothold.core {
 		}
 
 
+		protected function addViewListener(type: String, listener: Function, useCapture: Boolean = false, priority: int = 0): void {
+			_view.addEventListener(type, listener, useCapture, priority, true);
+		}
+
+
+		protected function removeViewListener(type: String, listener: Function, useCapture: Boolean = false): void {
+			_view.removeEventListener(type, listener, useCapture);
+		}
+
+
 		/**
 		 * Debug function to ensure that all flags values are unique.
 		 *
@@ -180,7 +212,12 @@ package by.ishaban.foothold.core {
 
 
 		protected function initialize(): void {
-			// ABSTRACT
+			addViewListener(Event.ADDED_TO_STAGE, onAddedToStage);
+			addViewListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage);
+
+			if (_view.stage) {
+				onAddedToStage();
+			}
 		}
 
 
@@ -202,7 +239,18 @@ package by.ishaban.foothold.core {
 		 */
 		protected function isInvalid(flags: uint = 1/*InvalidationType.INVALIDATE_ALL*/): Boolean {
 			return _invalidationMask & flags ||
+			       _invalidationMask == InvalidationType.INVALIDATE_ALL ||
 			       (flags & InvalidationType.INVALIDATE_ALL && _invalidationMask != InvalidationType.INVALIDATE_NONE);
+		}
+
+
+		private function onRemovedFromStage(event: Event): void {
+			_depth = -1;
+		}
+
+
+		private function onAddedToStage(event: Event = null): void {
+			_depth = getDisplayObjectDepthFromStage(view);
 		}
 	}
 }

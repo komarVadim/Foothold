@@ -4,10 +4,9 @@ package by.ishaban.foothold {
 
 	public class Foothold {
 
-		private static var _stage: Stage;
-
 		public static const VERSION: String = "0.0.0";
 		public static const IS_RELEASE_BUILD: Boolean = false;
+		private static var _stage: Stage;
 
 
 		public static function get stage(): Stage {
@@ -17,6 +16,11 @@ package by.ishaban.foothold {
 
 		public static function initialize(stage: Stage): void {
 			Foothold._stage = stage;
+		}
+
+
+		public static function dispose(): void {
+			Foothold._stage = null;
 		}
 
 

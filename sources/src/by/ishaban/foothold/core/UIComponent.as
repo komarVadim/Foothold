@@ -1,33 +1,13 @@
 package by.ishaban.foothold.core {
 
-	import by.ishaban.foothold.*;
+	import by.ishaban.foothold.Foothold;
 
-	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
 
 	public class UIComponent extends ValidationComponent {
-		/**
-		 * Calculates how many levels deep the target object is on the display list,
-		 * starting from the Starling stage. If the target object is the stage, the
-		 * depth will be <code>0</code>. A direct child of the stage will have a
-		 * depth of <code>1</code>, and it increases with each new level. If the
-		 * object does not have a reference to the stage, the depth will always be
-		 * <code>-1</code>, even if the object has a parent.
-		 */
-		protected static function getDisplayObjectDepthFromStage(target: DisplayObject): int {
-			if (!target.stage) {
-				return -1;
-			}
-			var count: int = 0;
-			while (target.parent) {
-				target = target.parent;
-				count++;
-			}
-			return count;
-		}
 
 
 		/**
@@ -53,17 +33,11 @@ package by.ishaban.foothold.core {
 		protected var _originalWidth: Number = 0;
 		/** @private */
 		protected var _originalHeight: Number = 0;
-		private var _depth: int;
 
 
 		public function UIComponent(view: Sprite) {
 			preInitialize();
 			super(view);
-		}
-
-
-		override public function get depth(): int {
-			return _depth;
 		}
 
 
@@ -298,7 +272,6 @@ package by.ishaban.foothold.core {
 
 		override protected function initialize(): void {
 			addViewListener(Event.ADDED_TO_STAGE, onAddedToStage);
-			addViewListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage);
 
 			super.initialize();
 
@@ -309,7 +282,6 @@ package by.ishaban.foothold.core {
 
 
 		override public function dispose(): void {
-			removeViewListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage);
 			removeViewListener(Event.ADDED_TO_STAGE, onAddedToStage);
 
 			super.dispose();
@@ -380,16 +352,6 @@ package by.ishaban.foothold.core {
 		}
 
 
-		protected function addViewListener(type: String, listener: Function, useCapture: Boolean = false, priority: int = 0): void {
-			_view.addEventListener(type, listener, useCapture, priority, true);
-		}
-
-
-		protected function removeViewListener(type: String, listener: Function, useCapture: Boolean = false): void {
-			_view.removeEventListener(type, listener, useCapture);
-		}
-
-
 		protected function preInitialize(): void {
 			// ABSTRACT
 		}
@@ -403,14 +365,7 @@ package by.ishaban.foothold.core {
 		}
 
 
-		private function onRemovedFromStage(event: Event): void {
-			_depth = -1;
-		}
-
-
 		private function onAddedToStage(event: Event = null): void {
-			_depth = getDisplayObjectDepthFromStage(view);
-
 			if (!_isInitialized) {
 				_isInitialized = true;
 				configUI();

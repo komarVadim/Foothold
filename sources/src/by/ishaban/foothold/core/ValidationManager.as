@@ -43,7 +43,7 @@ package by.ishaban.foothold.core {
 
 		public function ValidationManager(lock: Lock) {
 			if (lock == null) {
-				throw IllegalOperationError("It is singleton class, do not try to initialize it out of existing API");
+				throw new IllegalOperationError("It is singleton class, do not try to initialize it out of existing API");
 			}
 			_stage = Foothold.stage;
 		}
@@ -53,6 +53,8 @@ package by.ishaban.foothold.core {
 			_stage.removeEventListener(Event.ENTER_FRAME, handleValidation);
 			_stage.removeEventListener(Event.RENDER, handleValidation);
 			_stage = null;
+
+			_instance = null;
 		}
 
 
