@@ -98,24 +98,10 @@ package by.ishaban.foothold.core {
 				}
 			}
 			var isAlreadyInvalid: Boolean = isInvalid();
-			var invalidate: Boolean;
-			if (flags & InvalidationType.INVALIDATE_ALL) {
-				if (_isValidating) {
-					_delayedInvalidationMask = InvalidationType.INVALIDATE_ALL;
-				} else {
-					_invalidationMask = InvalidationType.INVALIDATE_ALL;
-				}
-				invalidate = true;
+			if (_isValidating) {
+				_delayedInvalidationMask |= diff;
 			} else {
-				var diff: uint = flags & ~_invalidationMask;
-				if (diff != 0) {
-					if (_isValidating) {
-						_delayedInvalidationMask |= diff;
-					} else {
-						_invalidationMask |= diff;
-					}
-					invalidate = true;
-				}
+				_invalidationMask |= diff;
 			}
 			// спорно, надо продумать, _validationManager нул только если мы уже задиспозились
 //			if (!_validationManager || !_isInitialized) {
@@ -124,7 +110,7 @@ package by.ishaban.foothold.core {
 //				return;
 //			}
 			// по сути проверка isAlreadyInvalid уже есть в менеджере и один компонент не может добавиться дважды
-			if (!isAlreadyInvalid && invalidate) {
+			if (!isAlreadyInvalid) {
 				_validationManager.add(this, false);
 			}
 		}
