@@ -3,7 +3,9 @@ package tests.foothold.core.mocks {
 	import by.ishaban.foothold.core.ValidationComponent;
 
 	import flash.display.Sprite;
+	import flash.events.Event;
 
+	[Event(type="flash.events.Event", name="render")]
 	public class MockValidator extends ValidationComponent {
 
 		public static const INVALIDATE_FLAG_1: uint = 2;
@@ -42,8 +44,9 @@ package tests.foothold.core.mocks {
 
 		override protected function draw(): void {
 			super.draw();
-
+			
 			_isValidated = true;
+			dispatchEvent(new Event(Event.RENDER));
 		}
 
 

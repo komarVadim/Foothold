@@ -1,5 +1,7 @@
 package by.ishaban.foothold {
 
+	import by.ishaban.foothold.core.ValidationManager;
+
 	import flash.display.Stage;
 
 	public class Foothold {
@@ -16,11 +18,13 @@ package by.ishaban.foothold {
 
 		public static function initialize(stage: Stage): void {
 			Foothold._stage = stage;
+			ValidationManager.initialize(stage);
 		}
 
 
 		public static function dispose(): void {
 			Foothold._stage = null;
+			ValidationManager.dispose();
 		}
 
 

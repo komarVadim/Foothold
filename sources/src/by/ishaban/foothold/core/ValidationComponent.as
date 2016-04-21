@@ -99,9 +99,9 @@ package by.ishaban.foothold.core {
 			}
 			var isAlreadyInvalid: Boolean = isInvalid();
 			if (_isValidating) {
-				_delayedInvalidationMask |= diff;
+				_delayedInvalidationMask |= flags;
 			} else {
-				_invalidationMask |= diff;
+				_invalidationMask |= flags;
 			}
 			// спорно, надо продумать, _validationManager нул только если мы уже задиспозились
 //			if (!_validationManager || !_isInitialized) {

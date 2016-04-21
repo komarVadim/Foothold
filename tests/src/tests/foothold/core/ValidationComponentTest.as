@@ -2,17 +2,22 @@ package tests.foothold.core {
 
 	import by.ishaban.foothold.Foothold;
 	import by.ishaban.foothold.core.InvalidationType;
-	import by.ishaban.foothold.core.ValidationManager;
 
-	import flash.utils.setTimeout;
+	import flash.events.Event;
 
 	import org.flexunit.asserts.assertFalse;
 	import org.flexunit.asserts.assertTrue;
+	import org.flexunit.asserts.fail;
 	import org.flexunit.async.Async;
 	import org.fluint.uiImpersonation.UIImpersonator;
 
 	import tests.foothold.core.mocks.MockValidator;
 
+	/**
+	 * ДОбавить тесты на прямой вызов validate:
+	 * - с флагами, убедиться что перерисовка в том же фрейме
+	 * - без флагов, убедиться что перерисовка не сработала
+	 */
 	public class ValidationComponentTest {
 
 		[Before(async, ui)]
@@ -24,7 +29,6 @@ package tests.foothold.core {
 		[After]
 		public function teardown(): void {
 			Foothold.dispose();
-			ValidationManager.getInstance().dispose();
 		}
 
 
@@ -108,26 +112,32 @@ package tests.foothold.core {
 
 		[Test(async, timeout=300)]
 		public function validation_works_when_component_in_display_list(): void {
+			var handler: Function = Async.asyncHandler(this,
+			                                           function (event: Event, passThroughObject: Object): void {
+				                                           assertTrue(true);
+			                                           }, 300, null,
+			                                           function (event: Event, passThroughObject: Object): void {
+				                                           fail("Rendering not happened.");
+			                                           });
 			var mock: MockValidator = new MockValidator();
+			mock.addEventListener(Event.RENDER, handler);
 			UIImpersonator.addChild(mock.view);
 			mock.invalidate();
-			var validate: Function = Async.asyncHandler(this, function (): void {
-				assertTrue(mock.isValidated);
-			}, 100);
-
-			setTimeout(validate, 100);
 		}
 
 
 		[Test(async, timeout=300)]
 		public function validation_not_works_when_component_not_in_display_list(): void {
+			var handler: Function = Async.asyncHandler(this,
+			                                           function (event: Event, passThroughObject: Object): void {
+				                                           fail("Rendering shouldn't happens.");
+			                                           }, 100, null,
+			                                           function (event: Event): void {
+				                                           assertTrue(true);
+			                                           });
 			var mock: MockValidator = new MockValidator();
+			mock.addEventListener(Event.RENDER, handler);
 			mock.invalidate();
-			var validate: Function = Async.asyncHandler(this, function (): void {
-				assertFalse(mock.isValidated);
-			}, 100);
-
-			setTimeout(validate, 100);
 		}
 
 	}

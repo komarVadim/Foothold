@@ -6,7 +6,6 @@ package {
 	import org.flexunit.listeners.CIListener;
 	import org.flexunit.runner.FlexUnitCore;
 
-	import tests.foothold.core.FootholdTest;
 	import tests.foothold.core.ValidationComponentTest;
 	import tests.foothold.core.ValidationManagerTest;
 
@@ -29,7 +28,7 @@ package {
 			var testsToRun: Array = [
 				ValidationComponentTest,
 				ValidationManagerTest,
-				FootholdTest,
+//				FootholdTest,
 			];
 			return testsToRun;
 		}

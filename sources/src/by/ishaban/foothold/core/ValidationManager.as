@@ -1,21 +1,35 @@
 package by.ishaban.foothold.core {
 
-	import by.ishaban.foothold.Foothold;
-
 	import flash.display.Stage;
 	import flash.errors.IllegalOperationError;
 	import flash.events.Event;
 
 	public class ValidationManager {
 
-		private static var _instance: ValidationManager;
+		protected static var _instance: ValidationManager;
+		protected static var _creationAvailable: Boolean;
 
 
 		public static function getInstance(): ValidationManager {
-			if (!_instance) {
-				_instance = new ValidationManager(new Lock());
-			}
 			return _instance;
+		}
+
+
+		public static function initialize(stage: Stage): void {
+			if (_instance) {
+				// TODO: throw Error
+			} else {
+				_creationAvailable = true;
+				_instance = new ValidationManager();
+				_instance._stage = stage;
+				_creationAvailable = false;
+			}
+		}
+
+
+		public static function dispose(): void {
+			_instance.dispose();
+			_instance = null;
 		}
 
 
@@ -34,18 +48,17 @@ package by.ishaban.foothold.core {
 		}
 
 
-		private var _delayedQueue: Vector.<IValidating> = new <IValidating>[];
-		private var _queue: Vector.<IValidating> = new <IValidating>[];
-		private var _isValidating: Boolean;
-		private var _isListening: Boolean;
-		private var _stage: Stage;
+		protected var _delayedQueue: Vector.<IValidating> = new <IValidating>[];
+		protected var _queue: Vector.<IValidating> = new <IValidating>[];
+		protected var _isValidating: Boolean;
+		protected var _isListening: Boolean;
+		protected var _stage: Stage;
 
 
-		public function ValidationManager(lock: Lock) {
-			if (lock == null) {
+		public function ValidationManager() {
+			if (!_creationAvailable) {
 				throw new IllegalOperationError("It is singleton class, do not try to initialize it out of existing API");
 			}
-			_stage = Foothold.stage;
 		}
 
 
@@ -138,7 +151,4 @@ package by.ishaban.foothold.core {
 
 
 	}
-}
-class Lock {
-
 }
