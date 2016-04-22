@@ -35,10 +35,14 @@ package by.ishaban.foothold.core {
 
 
 		/**
-		 * @private
 		 * Flag to indicate that the control is currently validating.
+		 * @private
 		 */
 		protected var _isValidating: Boolean = false;
+		/**
+		 * Property protected only for use in mock files for unit-tests, do not use it in code.
+		 * @private
+		 */
 		protected var _validationManager: ValidationManager;
 		protected var _isInitialized: Boolean = false;
 		/**
@@ -46,9 +50,21 @@ package by.ishaban.foothold.core {
 		 */
 		protected var _isDisposed: Boolean = false;
 		protected var _view: Sprite;
-		private var _invalidationMask: uint = InvalidationType.INVALIDATE_NONE;
-		private var _delayedInvalidationMask: uint = InvalidationType.INVALIDATE_NONE;
-		private var _depth: int = -1;
+		/**
+		 * Property protected only for use in mock files for unit-tests, do not use it in code.
+		 * @private
+		 */
+		protected var _invalidationMask: uint = InvalidationType.INVALIDATE_NONE;
+		/**
+		 * Property protected only for use in mock files for unit-tests, do not use it in code.
+		 * @private
+		 */
+		protected var _delayedInvalidationMask: uint = InvalidationType.INVALIDATE_NONE;
+		/**
+		 * Property protected only for use in mock files for unit-tests, do not use it in code.
+		 * @private
+		 */
+		protected var _depth: int = -1;
 
 
 		public function ValidationComponent(view: Sprite) {
@@ -117,7 +133,7 @@ package by.ishaban.foothold.core {
 
 
 		/**
-		 * Хочеться закрыть прямой доступ к этому методу, возможно через неймспейсы или как колбэк
+		 * Method forces redraw. You can call this method even if component is not in display list.
 		 */
 		public function validate(): void {
 			if (_isDisposed) {
