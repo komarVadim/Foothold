@@ -1,5 +1,7 @@
 package by.ishaban.foothold.core {
 
+	import by.ishaban.foothold.events.ComponentEvent;
+
 	import flash.display.DisplayObject;
 	import flash.display.Sprite;
 	import flash.errors.IllegalOperationError;
@@ -54,12 +56,12 @@ package by.ishaban.foothold.core {
 		 * Property protected only for use in mock files for unit-tests, do not use it in code.
 		 * @private
 		 */
-		protected var _invalidationMask: uint = InvalidationType.INVALIDATE_NONE;
+		protected var _invalidationMask: uint = InvalidationType.NONE;
 		/**
 		 * Property protected only for use in mock files for unit-tests, do not use it in code.
 		 * @private
 		 */
-		protected var _delayedInvalidationMask: uint = InvalidationType.INVALIDATE_NONE;
+		protected var _delayedInvalidationMask: uint = InvalidationType.NONE;
 		/**
 		 * Property protected only for use in mock files for unit-tests, do not use it in code.
 		 * @private
@@ -78,7 +80,7 @@ package by.ishaban.foothold.core {
 			initialize();
 
 			CONFIG::debug{
-				checkFlags(InvalidationType.INVALIDATE_ALL, InvalidationType.INVALIDATE_DATA, InvalidationType.INVALIDATE_SIZE, InvalidationType.INVALIDATE_STATE);
+				checkFlags(InvalidationType.ALL, InvalidationType.DATA, InvalidationType.SIZE, InvalidationType.STATE);
 			}
 		}
 
@@ -93,7 +95,19 @@ package by.ishaban.foothold.core {
 		}
 
 
-		public function dispose(): void {
+		public final function dispose(): void {
+			dispatchEvent(new ComponentEvent(ComponentEvent.BEFORE_DISPOSE));
+			doDispose();
+			dispatchEvent(new ComponentEvent(ComponentEvent.AFTER_DISPOSE));
+		}
+
+
+		/**
+		 * Use this method to dispose anything in subclasses.
+		 */
+		protected function doDispose(): void {
+			removeViewListener(Event.ADDED_TO_STAGE, onAddedToStage);
+			removeViewListener(Event.REMOVED_FROM_STAGE, onRemovedFromStage);
 			_view = null;
 			_validationManager = null;
 			_isDisposed = true;
@@ -105,9 +119,9 @@ package by.ishaban.foothold.core {
 		 * @param flags
 		 *
 		 * TODO: i don't like it, but i didn't fount any easy way to declare compilation order,
-		 * TODO: so i inline InvalidationType.INVALIDATE_ALL constant (( Need to find workaround
+		 * TODO: so i inline InvalidationType.ALL constant (( Need to find workaround
 		 */
-		public function invalidate(flags: uint = 1/*InvalidationType.INVALIDATE_ALL*/): void {
+		public function invalidate(flags: uint = 1/*InvalidationType.ALL*/): void {
 			CONFIG::debug{
 				if ((flags & ~_availableFlagsHash) != 0) {
 					throw new IllegalOperationError("You cannot validate flag that not available for " + this + " component. Please check flags in 'invalidate()' method above the stack.");
@@ -162,7 +176,7 @@ package by.ishaban.foothold.core {
 			_isValidating = true;
 			draw();
 			_invalidationMask = _delayedInvalidationMask;
-			_delayedInvalidationMask = InvalidationType.INVALIDATE_NONE;
+			_delayedInvalidationMask = InvalidationType.NONE;
 			_isValidating = false;
 //			if (!_hasValidated) {
 //				_hasValidated = true;
@@ -172,17 +186,17 @@ package by.ishaban.foothold.core {
 
 
 		public function invalidateSize(): void {
-			invalidate(InvalidationType.INVALIDATE_SIZE);
+			invalidate(InvalidationType.SIZE);
 		}
 
 
 		public function invalidateData(): void {
-			invalidate(InvalidationType.INVALIDATE_DATA);
+			invalidate(InvalidationType.DATA);
 		}
 
 
 		public function invalidateState(): void {
-			invalidate(InvalidationType.INVALIDATE_STATE);
+			invalidate(InvalidationType.STATE);
 		}
 
 
@@ -237,12 +251,12 @@ package by.ishaban.foothold.core {
 		 * returns <code>true</code>.
 		 *
 		 * TODO: i don't like it, but i didn't fount any easy way to declare compilation order,
-		 * TODO: so i inline InvalidationType.INVALIDATE_ALL constant (( Need to find workaround
+		 * TODO: so i inline InvalidationType.ALL constant (( Need to find workaround
 		 */
-		protected function isInvalid(flags: uint = 1/*InvalidationType.INVALIDATE_ALL*/): Boolean {
+		protected function isInvalid(flags: uint = 1/*InvalidationType.ALL*/): Boolean {
 			return _invalidationMask & flags ||
-			       _invalidationMask == InvalidationType.INVALIDATE_ALL ||
-			       (flags & InvalidationType.INVALIDATE_ALL && _invalidationMask != InvalidationType.INVALIDATE_NONE);
+			       _invalidationMask == InvalidationType.ALL ||
+			       (flags & InvalidationType.ALL && _invalidationMask != InvalidationType.NONE);
 		}
 
 

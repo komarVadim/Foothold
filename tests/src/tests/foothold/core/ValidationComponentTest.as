@@ -8,6 +8,7 @@ package tests.foothold.core {
 
 	import org.flexunit.asserts.assertEquals;
 	import org.flexunit.asserts.assertFalse;
+	import org.flexunit.asserts.assertNull;
 	import org.flexunit.asserts.assertTrue;
 	import org.flexunit.asserts.fail;
 	import org.flexunit.async.Async;
@@ -63,6 +64,7 @@ package tests.foothold.core {
 		public function after_dispose_component_marked_as_disposed(): void {
 			var mock: MockValidator = new MockValidator();
 			mock.dispose();
+			assertNull(mock.view);
 			assertTrue(mock.isDisposed);
 		}
 
@@ -80,7 +82,7 @@ package tests.foothold.core {
 		public function invalidate_size(): void {
 			var mock: MockValidator = new MockValidator();
 			mock.invalidateSize();
-			assertTrue(mock.isFlagInvalid(InvalidationType.INVALIDATE_SIZE));
+			assertTrue(mock.isFlagInvalid(InvalidationType.SIZE));
 		}
 
 
@@ -88,7 +90,7 @@ package tests.foothold.core {
 		public function invalidate_state(): void {
 			var mock: MockValidator = new MockValidator();
 			mock.invalidateState();
-			assertTrue(mock.isFlagInvalid(InvalidationType.INVALIDATE_STATE));
+			assertTrue(mock.isFlagInvalid(InvalidationType.STATE));
 		}
 
 
@@ -96,16 +98,16 @@ package tests.foothold.core {
 		public function invalidate_data(): void {
 			var mock: MockValidator = new MockValidator();
 			mock.invalidateData();
-			assertTrue(mock.isFlagInvalid(InvalidationType.INVALIDATE_DATA));
+			assertTrue(mock.isFlagInvalid(InvalidationType.DATA));
 		}
 
 
 		[Test]
 		public function invalidate_all(): void {
 			var mock: MockValidator = new MockValidator();
-			mock.invalidate(InvalidationType.INVALIDATE_ALL);
-			assertTrue(mock.isFlagInvalid(InvalidationType.INVALIDATE_SIZE));
-			assertTrue(mock.isFlagInvalid(InvalidationType.INVALIDATE_ALL));
+			mock.invalidate(InvalidationType.ALL);
+			assertTrue(mock.isFlagInvalid(InvalidationType.SIZE));
+			assertTrue(mock.isFlagInvalid(InvalidationType.ALL));
 		}
 
 
@@ -113,16 +115,16 @@ package tests.foothold.core {
 		public function invalidate_all_is_default_invalidation_flag(): void {
 			var mock: MockValidator = new MockValidator();
 			mock.invalidate();
-			assertTrue(mock.isFlagInvalid(InvalidationType.INVALIDATE_SIZE));
-			assertTrue(mock.isFlagInvalid(InvalidationType.INVALIDATE_ALL));
+			assertTrue(mock.isFlagInvalid(InvalidationType.SIZE));
+			assertTrue(mock.isFlagInvalid(InvalidationType.ALL));
 		}
 
 
 		[Test]
 		public function invalidate_wrong_flag(): void {
 			var mock: MockValidator = new MockValidator();
-			mock.invalidate(InvalidationType.INVALIDATE_SIZE);
-			assertFalse(mock.isFlagInvalid(InvalidationType.INVALIDATE_DATA));
+			mock.invalidate(InvalidationType.SIZE);
+			assertFalse(mock.isFlagInvalid(InvalidationType.DATA));
 		}
 
 
@@ -190,7 +192,7 @@ package tests.foothold.core {
 			                                           });
 			var mock: MockValidator = new MockValidator();
 			mock.addEventListener(Event.RENDER, handler);
-			mock.setInvalidationFlagsExternal(InvalidationType.INVALIDATE_DATA);
+			mock.setInvalidationFlagsExternal(InvalidationType.DATA);
 			mock.validate();
 			assertTrue(mock.isValidated);
 		}
@@ -208,7 +210,7 @@ package tests.foothold.core {
 			var mock: MockValidator = new MockValidator();
 			UIImpersonator.addChild(mock.view);
 			mock.addEventListener(Event.RENDER, handler);
-			mock.setInvalidationFlagsExternal(InvalidationType.INVALIDATE_DATA);
+			mock.setInvalidationFlagsExternal(InvalidationType.DATA);
 			mock.validate();
 			assertTrue(mock.isValidated);
 		}
@@ -267,6 +269,39 @@ package tests.foothold.core {
 			mock.addEventListener(Event.RENDER, handler);
 			mock.validate();
 			assertTrue(mock.isValidated);
+		}
+
+
+		[Test(async, timeout=300)]
+		public function validation_order_goes_from_bottom_to_top(): void {
+			var tempContainer: Sprite = new Sprite();
+			var handler0: Function = Async.asyncHandler(this,
+			                                            function (event: Event, passThroughObject: Object): void {
+				                                            assertTrue(mock0.isValidated);
+				                                            assertFalse(mock1.isValidated);
+			                                            }, 100, null,
+			                                            function (event: Event): void {
+				                                            fail("Rendering not happened.");
+			                                            });
+			var handler1: Function = Async.asyncHandler(this,
+			                                            function (event: Event, passThroughObject: Object): void {
+				                                            assertTrue(mock0.isValidated);
+				                                            assertTrue(mock1.isValidated);
+			                                            }, 100, null,
+			                                            function (event: Event): void {
+				                                            fail("Rendering not happened.");
+			                                            });
+			var mock1: MockValidator = new MockValidator();
+			mock1.addEventListener(Event.RENDER, handler1);
+			mock1.invalidate();
+
+			var mock0: MockValidator = new MockValidator();
+			mock0.addEventListener(Event.RENDER, handler0);
+			mock0.invalidate();
+
+			tempContainer.addChild(mock1.view);
+			UIImpersonator.addChild(tempContainer);
+			UIImpersonator.addChild(mock0.view);
 		}
 
 	}

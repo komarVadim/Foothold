@@ -2,12 +2,28 @@ package by.ishaban.foothold.core {
 
 	import by.ishaban.foothold.Foothold;
 
+	import flash.display.DisplayObject;
 	import flash.display.DisplayObjectContainer;
+	import flash.display.Graphics;
+	import flash.display.MovieClip;
+	import flash.display.Shape;
 	import flash.display.Sprite;
 	import flash.events.Event;
 	import flash.events.MouseEvent;
+	import flash.geom.Rectangle;
+	import flash.text.TextField;
 
 	public class UIComponent extends ValidationComponent {
+
+
+		protected static function addStageListener(type: String, listener: Function, useCapture: Boolean = false, priority: int = 0): void {
+			Foothold.stage.addEventListener(type, listener, useCapture, priority, true);
+		}
+
+
+		protected static function removeStageListener(type: String, listener: Function, useCapture: Boolean = false): void {
+			Foothold.stage.removeEventListener(type, listener, useCapture);
+		}
 
 
 		/**
@@ -21,23 +37,51 @@ package by.ishaban.foothold.core {
 		protected var _isButtonBehaviour: Boolean;
 		/**
 		 * @private
-		 * Internal width.
+		 * Internal width. I don't decide what to do with this props, leave it or use view's props and let users introduce them on demand
 		 */
 		protected var _width: Number = 0;
 		/**
 		 * @private
-		 * Internal height.
+		 * Internal width. I don't decide what to do with this props, leave it or use view's props and let users introduce them on demand
 		 * */
 		protected var _height: Number = 0;
-		/** @private */
-		protected var _originalWidth: Number = 0;
-		/** @private */
-		protected var _originalHeight: Number = 0;
+		/**
+		 * @private
+		 * Debug method, traces view's size.
+		 * */
+		CONFIG::debug
+		protected var _isDebugMode: Boolean;
 
 
 		public function UIComponent(view: Sprite) {
 			preInitialize();
 			super(view);
+		}
+
+
+		CONFIG::debug
+		public function get isDebugMode(): Boolean {
+			return _isDebugMode;
+		}
+
+
+		CONFIG::debug
+		public function set isDebugMode(value: Boolean): void {
+			if (_isDebugMode == value) {
+				return;
+			}
+
+			_isDebugMode = value;
+
+			if (value) {
+				updateDebugInfo();
+				addViewListener(Event.ADDED, childUpdateHandler);
+				addViewListener(Event.REMOVED, childUpdateHandler);
+			} else {
+				_view.graphics.clear();
+				removeViewListener(Event.ADDED, childUpdateHandler);
+				removeViewListener(Event.REMOVED, childUpdateHandler);
+			}
 		}
 
 
@@ -74,29 +118,15 @@ package by.ishaban.foothold.core {
 		}
 
 
-//todo: implement!
-//		override public function get enabled(): Boolean {
-//			return super.enabled;
-//		}
-//
-//
-//		override public function set enabled(value: Boolean): void {
-//			if (value == super.enabled) {
-//				return;
-//			}
-//
-//			super.enabled = value;
-//			tabEnabled = (!enabled) ? false : _focusable;
-//			mouseEnabled = value;
-//		}
-
-
 		public function get isButtonBehaviour(): Boolean {
 			return _isButtonBehaviour;
 		}
 
 
 		public function set isButtonBehaviour(value: Boolean): void {
+			if (value == _isButtonBehaviour) {
+				return;
+			}
 			_isButtonBehaviour = value;
 			buttonMode = value;
 			if (_isButtonBehaviour) {
@@ -177,6 +207,23 @@ package by.ishaban.foothold.core {
 		public function get width(): Number {
 			return _view.width;
 		}
+
+
+//todo: implement!
+//		override public function get enabled(): Boolean {
+//			return super.enabled;
+//		}
+//
+//
+//		override public function set enabled(value: Boolean): void {
+//			if (value == super.enabled) {
+//				return;
+//			}
+//
+//			super.enabled = value;
+//			tabEnabled = (!enabled) ? false : _focusable;
+//			mouseEnabled = value;
+//		}
 
 
 		/**
@@ -281,10 +328,84 @@ package by.ishaban.foothold.core {
 		}
 
 
-		override public function dispose(): void {
+		override protected function doDispose(): void {
 			removeViewListener(Event.ADDED_TO_STAGE, onAddedToStage);
+			isButtonBehaviour = false;
 
-			super.dispose();
+			super.doDispose();
+		}
+
+
+		public function contains(value: DisplayObject): Boolean {
+			return value && _view.contains(value);
+		}
+
+
+		/**
+		 * Checks if value not nested child.
+		 * @param value
+		 * @return
+		 */
+		public function containsDirectly(value: DisplayObject): Boolean {
+			return value && value.parent == view && view;
+		}
+
+
+		/**
+		 * Add child like original method. Generates error if we trying to add null-value.
+		 * @param value Any not-null DisplayObject
+		 * @return
+		 */
+		public function addChild(value: DisplayObject): DisplayObject {
+			return _view.addChild(value);
+		}
+
+
+		public function addChildAt(view: DisplayObject, index: int): DisplayObject {
+			return _view.addChildAt(view, index);
+		}
+
+
+		/**
+		 * Safely removeChild method. Checks if value is child of current container and then remove it if its possible.
+		 * @param    value
+		 * @return
+		 */
+		public function removeChild(value: DisplayObject): DisplayObject {
+			return containsDirectly(value) ? _view.removeChild(value) : value;
+		}
+
+
+		public function getMovieClip(name: String, parentContainer: DisplayObjectContainer = null): MovieClip {
+			return getChildByName(name + "_mc", parentContainer) as MovieClip;
+		}
+
+
+		public function getSprite(name: String, parentContainer: DisplayObjectContainer = null): Sprite {
+			return getChildByName(name, parentContainer) as Sprite;
+		}
+
+
+		public function getTextField(name: String, parentContainer: DisplayObjectContainer = null): TextField {
+			return getChildByName(name + "_tf", parentContainer) as TextField;
+		}
+
+
+		public function getShape(name: String, parentContainer: DisplayObjectContainer = null): Shape {
+			return getChildByName(name, parentContainer) as Shape;
+		}
+
+
+		public function getChildByName(name: String, parentContainer: DisplayObjectContainer = null): DisplayObject {
+			parentContainer ||= _view;
+			return parentContainer.getChildByName(name);
+		}
+
+
+		public function removeAllChildren(): void {
+			while (_view && _view.numChildren) {
+				_view.removeChildAt(0);
+			}
 		}
 
 
@@ -342,16 +463,6 @@ package by.ishaban.foothold.core {
 		}
 
 
-		protected function addStageListener(type: String, listener: Function, useCapture: Boolean = false, priority: int = 0): void {
-			Foothold.stage.addEventListener(type, listener, useCapture, priority, true);
-		}
-
-
-		protected function removeStageListener(type: String, listener: Function, useCapture: Boolean = false): void {
-			Foothold.stage.removeEventListener(type, listener, useCapture);
-		}
-
-
 		protected function preInitialize(): void {
 			// ABSTRACT
 		}
@@ -365,7 +476,30 @@ package by.ishaban.foothold.core {
 		}
 
 
+		CONFIG::debug
+		private function updateDebugInfo(): void {
+			var bounds: Rectangle = _view.getBounds(_view);
+			var g: Graphics = _view.graphics;
+			g.clear();
+			g.lineStyle(1, 0xFF0000);
+			g.beginFill(0x00CCFF, 0.4);
+			g.drawRect(bounds.x, bounds.y, bounds.width, bounds.height);
+			g.endFill();
+		}
+
+
+		CONFIG::debug
+		private function childUpdateHandler(event: Event): void {
+			if (event.target == _view) {
+				return;
+			}
+
+			updateDebugInfo();
+		}
+
+
 		private function onAddedToStage(event: Event = null): void {
+			removeViewListener(Event.ADDED_TO_STAGE, onAddedToStage);
 			if (!_isInitialized) {
 				_isInitialized = true;
 				configUI();

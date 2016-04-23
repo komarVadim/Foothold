@@ -11,18 +11,19 @@ package tests.foothold.core.mocks {
 		public static const INVALIDATE_FLAG_1: uint = 2;
 		public static const INVALIDATE_FLAG_2: uint = 4;
 		public static const INVALIDATE_FLAG_3: uint = 8;
-		private static var _index: int;
+		private static var __index: int;
 		private var _redrawCount: int;
+		private var _index: int;
 
 
 		public function MockValidator() {
 			super(new Sprite());
-			_redrawCount++;
+			_index = __index++;
 		}
 
 
 		override public function toString(): String {
-			return "[MockValidator: " + _index + "]";
+			return "[MockValidator: " + _index + ", depth: " + depth + "]";
 		}
 
 

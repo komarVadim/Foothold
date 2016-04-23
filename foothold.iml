@@ -32,6 +32,9 @@
             <entry library-id="116ad59b-ad3b-4041-a1ee-60958ab7cf80">
               <dependency linkage="Merged" />
             </entry>
+            <entry library-id="547c39f5-316e-4f3f-9088-b7fdb3996f6c">
+              <dependency linkage="Merged" />
+            </entry>
           </entries>
           <sdk name="flex_sdk_4.6.0.23201B" />
         </dependencies>
@@ -144,6 +147,16 @@
         <properties id="116ad59b-ad3b-4041-a1ee-60958ab7cf80" />
         <CLASSES>
           <root url="jar://$MODULE_DIR$/tests/libs/flexunit-flexcoverlistener-4.2.0-20140410-4.12.0.swc!/" />
+        </CLASSES>
+        <JAVADOC />
+        <SOURCES />
+      </library>
+    </orderEntry>
+    <orderEntry type="module-library" exported="">
+      <library type="flex">
+        <properties id="547c39f5-316e-4f3f-9088-b7fdb3996f6c" />
+        <CLASSES>
+          <root url="jar://$MODULE_DIR$/tests/libs/mocks.swc!/" />
         </CLASSES>
         <JAVADOC />
         <SOURCES />
